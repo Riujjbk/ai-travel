@@ -1,16 +1,11 @@
 package com.ui.ailvyou.app;
 
 import com.ui.ailvyou.advisor.MyLoggerAdvisor;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-
 import org.springframework.ai.chat.memory.ChatMemory;
-
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
-//import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
-//import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
@@ -20,8 +15,7 @@ import org.springframework.stereotype.Component;
 public class TravelApp {
 
 
-
-    private final ChatClient  chatClient;
+    private final ChatClient chatClient;
 
 
     public static final String TRAVEL_AI_ASSISTANT_PROMPT =
@@ -50,8 +44,6 @@ public class TravelApp {
     public TravelApp(ChatModel dashscopeChatModel) {
 
 
-        ChatMemory chatMemory = new InMemoryChatMemory();
-
 /**
  *
  *         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
@@ -61,13 +53,15 @@ public class TravelApp {
  * */
 
 
-
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(TRAVEL_AI_ASSISTANT_PROMPT)
                 .defaultAdvisors(
-                            MessageChatMemoryAdvisor.builder(chatMemory).build(),
-                            // 自定义日志 Advisor，可按需开启
-                            new MyLoggerAdvisor()
+                        MessageChatMemoryAdvisor
+                                .builder(MessageWindowChatMemory.builder()
+                                        .maxMessages(100)
+                                        .build()).build(),
+                        // 自定义日志 Advisor，可按需开启
+                        new MyLoggerAdvisor()
 //                        // 自定义推理增强 Advisor，可按需开启
 //                       ,new ReReadingAdvisor()  成本高了
                 )
@@ -97,8 +91,6 @@ public class TravelApp {
         log.info("content: {}", content);
         return content;
     }
-
-
 
 
 }
